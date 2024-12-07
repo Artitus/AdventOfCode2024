@@ -12,8 +12,7 @@ public class App
     {
         System.out.println( "Hello World!" );
         DayOne day1 = new DayOne();
-       // day1.calc();
-       // System.out.println(day1.getTotal());
-        System.out.println(day1.part1());
+        System.out.println("Day 1, part 1: " + day1.part1());
+        System.out.println("Day 1, part 2: " + day1.part2());
     }
 }
