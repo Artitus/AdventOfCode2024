@@ -3,8 +3,8 @@ package io.hurbs.adventofcode2024.puzzledays;
 import io.hurbs.adventofcode2024.util.AbstractAdventPuzzleDay;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AdventPuzzleDaySeven extends AbstractAdventPuzzleDay {
 
@@ -14,70 +14,76 @@ public class AdventPuzzleDaySeven extends AbstractAdventPuzzleDay {
 
     @Override
     public String solvePart1() {
-        return calculateCalibrationResult(inputLines, 2); // Only supports + and *
+        return String.valueOf(calculateCalibrationResult(2)); // Only supports + and *
     }
 
     @Override
     public String solvePart2() {
-        return calculateCalibrationResult(inputLines, 3); // Includes concatenation (||)
+        return String.valueOf(calculateCalibrationResult(3)); // Includes concatenation (||)
     }
 
-    private String calculateCalibrationResult(List<String> equations, int numOperators) {
+    private long calculateCalibrationResult(int operatorCount) {
         long totalCalibrationResult = 0;
 
-        for (String equation : equations) {
-            String[] parts = equation.split(":");
+        for (String line : inputLines) {
+            String[] parts = line.split(":");
             long targetValue = Long.parseLong(parts[0].trim());
-            String[] numberStrings = parts[1].trim().split(" ");
-            long[] numbers = new long[numberStrings.length];
-            for (int i = 0; i < numberStrings.length; i++) {
-                numbers[i] = Long.parseLong(numberStrings[i]);
-            }
+            long[] numbers = parseNumbers(parts[1].trim());
 
-            if (canMatchTarget(numbers, targetValue, numOperators)) {
+            if (canMatchTarget(numbers, targetValue, operatorCount)) {
                 totalCalibrationResult += targetValue;
             }
         }
 
-        return String.valueOf(totalCalibrationResult);
+        return totalCalibrationResult;
     }
 
-    private boolean canMatchTarget(long[] numbers, long targetValue, int numOperators) {
-        int n = numbers.length;
-        int totalCombinations = (int) Math.pow(numOperators, n - 1);
+    private long[] parseNumbers(String numberString) {
+        String[] numberTokens = numberString.split(" ");
+        long[] numbers = new long[numberTokens.length];
 
-        // Generate all possible combinations of operators
-        for (int i = 0; i < totalCombinations; i++) {
-            char[] operators = new char[n - 1];
-            int combination = i;
-            for (int j = 0; j < n - 1; j++) {
-                int operatorIndex = combination % numOperators;
-                combination /= numOperators;
-                operators[j] = (operatorIndex == 0) ? '+' : (operatorIndex == 1) ? '*' : '|';
-            }
-
-            // Evaluate the expression with the current operator combination
-            if (evaluateExpression(numbers, operators) == targetValue) {
-                return true;
-            }
+        for (int i = 0; i < numberTokens.length; i++) {
+            numbers[i] = Long.parseLong(numberTokens[i]);
         }
 
-        return false;
+        return numbers;
     }
 
-    private long evaluateExpression(long[] numbers, char[] operators) {
-        long result = numbers[0];
+    private boolean canMatchTarget(long[] numbers, long targetValue, int operatorCount) {
+        Map<String, Boolean> memo = new HashMap<>();
+        return evaluate(numbers, 0, operatorCount, targetValue, numbers[0], memo);
+    }
 
-        for (int i = 0; i < operators.length; i++) {
-            if (operators[i] == '+') {
-                result += numbers[i + 1];
-            } else if (operators[i] == '*') {
-                result *= numbers[i + 1];
-            } else if (operators[i] == '|') {
-                result = Long.parseLong(result + "" + numbers[i + 1]);
-            }
+    private boolean evaluate(long[] numbers, int index, int operatorCount, long targetValue, long currentResult, Map<String, Boolean> memo) {
+        if (index == numbers.length - 1) {
+            return currentResult == targetValue;
         }
 
+        String memoKey = index + ":" + currentResult;
+        if (memo.containsKey(memoKey)) {
+            return memo.get(memoKey);
+        }
+
+        long nextNumber = numbers[index + 1];
+        boolean result = false;
+
+        // Addition
+        if (operatorCount > 0) {
+            result |= evaluate(numbers, index + 1, operatorCount, targetValue, currentResult + nextNumber, memo);
+        }
+
+        // Multiplication
+        if (operatorCount > 1) {
+            result |= evaluate(numbers, index + 1, operatorCount, targetValue, currentResult * nextNumber, memo);
+        }
+
+        // Concatenation
+        if (operatorCount > 2) {
+            long concatenated = Long.parseLong(currentResult + "" + nextNumber);
+            result |= evaluate(numbers, index + 1, operatorCount, targetValue, concatenated, memo);
+        }
+
+        memo.put(memoKey, result);
         return result;
     }
 }

@@ -19,15 +19,10 @@ public class AdventPuzzleDayFive extends AbstractAdventPuzzleDay {
         parseInput(inputLines, rules, updates);
 
         Map<Integer, List<Integer>> ruleMap = buildRuleMap(rules);
-        int sumOfMiddlePages = 0;
-
-        for (List<Integer> update : updates) {
-            if (isUpdateValid(update, ruleMap)) {
-                sumOfMiddlePages += update.get(update.size() / 2);
-            }
-        }
-
-        return String.valueOf(sumOfMiddlePages);
+        return String.valueOf(updates.stream()
+                .filter(update -> isUpdateValid(update, ruleMap))
+                .mapToInt(update -> update.get(update.size() / 2))
+                .sum());
     }
 
     @Override
@@ -38,17 +33,11 @@ public class AdventPuzzleDayFive extends AbstractAdventPuzzleDay {
         parseInput(inputLines, rules, updates);
 
         Map<Integer, List<Integer>> ruleMap = buildRuleMap(rules);
-        int sumOfMiddlePages = 0;
-
-        for (List<Integer> update : updates) {
-            if (!isUpdateValid(update, ruleMap)) {
-                // Reorder the update
-                List<Integer> reorderedUpdate = reorderUpdate(update, ruleMap);
-                sumOfMiddlePages += reorderedUpdate.get(reorderedUpdate.size() / 2);
-            }
-        }
-
-        return String.valueOf(sumOfMiddlePages);
+        return String.valueOf(updates.stream()
+                .filter(update -> !isUpdateValid(update, ruleMap))
+                .map(update -> reorderUpdate(update, ruleMap))
+                .mapToInt(reorderedUpdate -> reorderedUpdate.get(reorderedUpdate.size() / 2))
+                .sum());
     }
 
     private void parseInput(List<String> lines, List<String> rules, List<List<Integer>> updates) {
@@ -63,11 +52,10 @@ public class AdventPuzzleDayFive extends AbstractAdventPuzzleDay {
             if (!isUpdateSection) {
                 rules.add(line.trim());
             } else {
-                List<Integer> update = new ArrayList<>();
-                for (String page : line.split(",")) {
-                    update.add(Integer.parseInt(page.trim()));
-                }
-                updates.add(update);
+                updates.add(Arrays.stream(line.split(","))
+                        .map(String::trim)
+                        .map(Integer::parseInt)
+                        .toList());
             }
         }
     }
@@ -89,48 +77,39 @@ public class AdventPuzzleDayFive extends AbstractAdventPuzzleDay {
     private boolean isUpdateValid(List<Integer> update, Map<Integer, List<Integer>> ruleMap) {
         Set<Integer> seenPages = new HashSet<>();
 
-        for (int i = 0; i < update.size(); i++) {
-            int currentPage = update.get(i);
+        for (int currentPage : update) {
             seenPages.add(currentPage);
-
-            if (ruleMap.containsKey(currentPage)) {
-                for (int mustFollow : ruleMap.get(currentPage)) {
-                    if (seenPages.contains(mustFollow)) {
-                        return false; // Rule violated
-                    }
-                }
+            if (ruleMap.getOrDefault(currentPage, Collections.emptyList())
+                    .stream()
+                    .anyMatch(seenPages::contains)) {
+                return false;
             }
         }
-
         return true;
     }
+
     private List<Integer> reorderUpdate(List<Integer> update, Map<Integer, List<Integer>> ruleMap) {
-        // Use a topological sort to reorder the pages in the update
         Map<Integer, Integer> inDegree = new HashMap<>();
         Map<Integer, List<Integer>> graph = new HashMap<>();
 
-        // Build the graph and in-degree map for the current update
         for (int page : update) {
             graph.putIfAbsent(page, new ArrayList<>());
             inDegree.putIfAbsent(page, 0);
         }
 
         for (int page : update) {
-            if (ruleMap.containsKey(page)) {
-                for (int dependentPage : ruleMap.get(page)) {
-                    if (update.contains(dependentPage)) {
-                        graph.get(page).add(dependentPage);
-                        inDegree.put(dependentPage, inDegree.getOrDefault(dependentPage, 0) + 1);
-                    }
+            for (int dependentPage : ruleMap.getOrDefault(page, Collections.emptyList())) {
+                if (update.contains(dependentPage)) {
+                    graph.get(page).add(dependentPage);
+                    inDegree.put(dependentPage, inDegree.get(dependentPage) + 1);
                 }
             }
         }
 
-        // Perform topological sort
-        Queue<Integer> queue = new LinkedList<>();
-        for (int page : inDegree.keySet()) {
-            if (inDegree.get(page) == 0) {
-                queue.add(page);
+        Queue<Integer> queue = new ArrayDeque<>();
+        for (Map.Entry<Integer, Integer> entry : inDegree.entrySet()) {
+            if (entry.getValue() == 0) {
+                queue.add(entry.getKey());
             }
         }
 
@@ -138,8 +117,7 @@ public class AdventPuzzleDayFive extends AbstractAdventPuzzleDay {
         while (!queue.isEmpty()) {
             int current = queue.poll();
             sortedOrder.add(current);
-
-            for (int neighbor : graph.get(current)) {
+            for (int neighbor : graph.getOrDefault(current, Collections.emptyList())) {
                 inDegree.put(neighbor, inDegree.get(neighbor) - 1);
                 if (inDegree.get(neighbor) == 0) {
                     queue.add(neighbor);
