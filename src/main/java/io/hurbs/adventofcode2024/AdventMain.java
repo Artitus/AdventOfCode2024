@@ -29,8 +29,14 @@ public class AdventMain
         //System.out.println("Day 4, part 1 " + day4.solvePart1());
         //System.out.println("Day 4, part 2 " + day4.solvePart2());
 
-        AdventPuzzleDayFive day5 = new AdventPuzzleDayFive("day5input.txt");
-        System.out.println("Day 5, part 1 " + day5.solvePart1());
-        System.out.println("Day 5, part 2 " + day5.solvePart2());
+        //AdventPuzzleDayFive day5 = new AdventPuzzleDayFive("day5input.txt");
+        //System.out.println("Day 5, part 1 " + day5.solvePart1());
+        //System.out.println("Day 5, part 2 " + day5.solvePart2());
+
+        AdventPuzzleDaySix day6 = new AdventPuzzleDaySix("day6input.txt");
+        System.out.println("Day 6, part 1 " + day6.solvePart1());
+        System.out.println("Day 6, part 2 " + day6.solvePart2());
+
+
     }
 }
