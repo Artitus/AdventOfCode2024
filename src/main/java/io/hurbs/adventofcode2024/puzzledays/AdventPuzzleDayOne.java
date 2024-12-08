@@ -39,7 +39,7 @@ public class AdventPuzzleDayOne extends AbstractAdventPuzzleDay {
             result1 += (Math.abs(list1.get(i) - list2.get(i)));
         }
 
-        return Integer.toString(result1);
+        return String.valueOf(result1);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class AdventPuzzleDayOne extends AbstractAdventPuzzleDay {
             similarityscore.addAndGet(k * v);
         });
 
-        return similarityscore.toString();
+        return String.valueOf(similarityscore);
 
     }
 
