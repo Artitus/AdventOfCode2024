@@ -1,9 +1,6 @@
 package io.hurbs.adventofcode2024;
 
-import io.hurbs.adventofcode2024.puzzledays.AdventPuzzleDayFour;
-import io.hurbs.adventofcode2024.puzzledays.AdventPuzzleDayOne;
-import io.hurbs.adventofcode2024.puzzledays.AdventPuzzleDayThree;
-import io.hurbs.adventofcode2024.puzzledays.AdventPuzzleDayTwo;
+import io.hurbs.adventofcode2024.puzzledays.*;
 
 import java.io.IOException;
 
@@ -28,8 +25,12 @@ public class AdventMain
         //System.out.println("Day 3, part 1 " + day3.solvePart1());
         //System.out.println("Day 3, part 2 " + day3.solvePart2());
 
-        AdventPuzzleDayFour day4 = new AdventPuzzleDayFour("day4input.txt");
-        System.out.println("Day 4, part 1 " + day4.solvePart1());
-        System.out.println("Day 4, part 2 " + day4.solvePart2());
+        //AdventPuzzleDayFour day4 = new AdventPuzzleDayFour("day4input.txt");
+        //System.out.println("Day 4, part 1 " + day4.solvePart1());
+        //System.out.println("Day 4, part 2 " + day4.solvePart2());
+
+        AdventPuzzleDayFive day5 = new AdventPuzzleDayFive("day5input.txt");
+        System.out.println("Day 5, part 1 " + day5.solvePart1());
+        System.out.println("Day 5, part 2 " + day5.solvePart2());
     }
 }
